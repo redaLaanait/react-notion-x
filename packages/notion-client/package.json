@@ -1,5 +1,5 @@
 {
-  "name": "notion-client",
+  "name": "notion-client-trk",
   "version": "4.9.97",
   "description": "Robust TypeScript client for the unofficial Notion API.",
   "repository": "NotionX/react-notion-x",
@@ -24,5 +24,6 @@
   "devDependencies": {
     "@types/node-fetch": "^2.5.7",
     "ava": "^3.13.0"
-  }
+  },
+  "gitHead": "a6f3d9df5d9adabb6e807d17495607d80231258a"
 }

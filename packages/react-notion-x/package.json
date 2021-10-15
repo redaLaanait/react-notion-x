@@ -1,5 +1,5 @@
 {
-  "name": "react-notion-x",
+  "name": "react-notion-x-trk",
   "version": "4.9.97",
   "description": "Fast and accurate React renderer for Notion.",
   "repository": "NotionX/react-notion-x",
@@ -45,5 +45,6 @@
   "peerDependencies": {
     "react": ">=16",
     "react-dom": ">=16"
-  }
+  },
+  "gitHead": "a6f3d9df5d9adabb6e807d17495607d80231258a"
 }

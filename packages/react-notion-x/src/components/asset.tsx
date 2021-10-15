@@ -24,7 +24,7 @@ const types = [
 
 export const Asset: React.FC<{
   block: BaseContentBlock
-}> = ({ block }) => {
+}> = ({ block, children }) => {
   const { recordMap, mapImageUrl, mapAssetUrl, components } = useNotionContext()
 
   if (!block || !types.includes(block.type)) {
@@ -37,7 +37,8 @@ export const Asset: React.FC<{
     justifyContent: 'center',
     alignSelf: 'center',
     width: '100%',
-    maxWidth: '100%'
+    maxWidth: '100%',
+    flexDirection: 'column'
   }
 
   const assetStyle: React.CSSProperties = {}
@@ -125,7 +126,7 @@ export const Asset: React.FC<{
     if (!isServer) {
       const signedUrl = recordMap.signed_urls?.[block.id]
       if (!signedUrl) return null
-      console.log('pdf', block, signedUrl)
+      // console.log('pdf', block, signedUrl)
 
       
       content = <components.pdf file={mapAssetUrl(signedUrl, (block as Block))} block={block} />
@@ -219,8 +220,8 @@ export const Asset: React.FC<{
     }
   } else if (block.type === 'image') {
     // console.log('image', block)
-
-    const src = mapImageUrl(source, block as Block)
+    const signedUrl = recordMap.signed_urls?.[block.id]
+    const src = mapImageUrl(signedUrl ||  source, block as Block)
     const caption = getTextContent(block.properties?.caption)
     const alt = caption || 'notion image'
 
@@ -229,11 +230,16 @@ export const Asset: React.FC<{
         src={src}
         alt={alt}
         style={assetStyle}
-        zoomable={true}
+        zoomable={false}
         height={style.height as number}
       />
     )
   }
 
-  return <div style={style}>{content}</div>
+  return (
+    <div style={style}>
+      {content}
+      {children}
+    </div>
+  )
 }

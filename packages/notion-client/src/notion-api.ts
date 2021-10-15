@@ -13,14 +13,12 @@ export class NotionAPI {
   private readonly _apiBaseUrl: string
   private readonly _authToken?: string
   private readonly _activeUser?: string
-  private readonly _userLocale: string
   private readonly _userTimeZone: string
 
   constructor({
     apiBaseUrl = 'https://www.notion.so/api/v3',
     authToken,
     activeUser,
-    userLocale = 'en',
     userTimeZone = 'America/New_York'
   }: {
     apiBaseUrl?: string
@@ -32,7 +30,6 @@ export class NotionAPI {
     this._apiBaseUrl = apiBaseUrl
     this._authToken = authToken
     this._activeUser = activeUser
-    this._userLocale = userLocale
     this._userTimeZone = userTimeZone
   }
 
@@ -125,9 +122,11 @@ export class NotionAPI {
                 type: collectionView?.type,
                 query: this.getQuery(collectionView),
                 groups:
-                  collectionView?.format?.board_groups2 ||
-                  collectionView?.format?.board_groups ||
-                  collectionView?.format?.board_columns,
+                  collectionView.type === 'board'
+                    ? collectionView?.format?.board_groups2 ||
+                      (collectionView?.format as any)?.board_groups ||
+                      collectionView?.format?.board_columns
+                    : [],
                 gotOptions
               }
             )
@@ -156,10 +155,12 @@ export class NotionAPI {
               ...recordMap.notion_user,
               ...collectionData.recordMap.notion_user
             }
-
             recordMap.collection_query![collectionId] = {
               ...recordMap.collection_query![collectionId],
-              [collectionViewId]: collectionData.result
+              [collectionViewId]:
+                (collectionData.result as any)?.reducerResults
+                  ?.collection_group_results ??
+                (collectionData.result as any)?.reducerResults
             }
           } catch (err) {
             // It's possible for public pages to link to private collections, in which case
@@ -185,6 +186,7 @@ export class NotionAPI {
           block &&
           (block.type === 'pdf' ||
             block.type === 'audio' ||
+            (block.type === 'image' && block.file_ids?.length) ||
             block.type === 'video' ||
             block.type === 'file')
         ) {
@@ -266,12 +268,11 @@ export class NotionAPI {
     collectionViewId: string,
     {
       type = 'table',
-      query = { aggregations: [{ property: 'title', aggregator: 'count' }] },
+      query,
       groups = undefined,
       limit = 999999,
       searchQuery = '',
       userTimeZone = this._userTimeZone,
-      userLocale = this._userLocale,
       loadContentCover = true,
       gotOptions
     }: {
@@ -295,28 +296,146 @@ export class NotionAPI {
     }
 
     const loader: any = {
-      type,
-      limit,
+      type: 'reducer',
+      reducers: {
+        collection_group_results: {
+          type: 'results',
+          limit,
+          loadContentCover
+        },
+        'table:uncategorized:title:count': {
+          type: 'aggregation',
+          aggregation: {
+            property: 'title',
+            aggregator: 'count'
+          }
+        }
+      },
+      ...query, //add the filters
       searchQuery,
-      userTimeZone,
-      userLocale,
-      loadContentCover
+      userTimeZone
     }
 
-    if (groups) {
+    if (groups && groups.length > 0) {
       // used for 'board' collection view queries
-      loader.groups = groups
+      const boardReducers = {
+        board_columns: {
+          type: 'groups',
+          groupBy: {
+            sort: {
+              type: 'manual'
+            },
+            type: 'select',
+            property: groups[0].property
+          },
+          groupSortPreference: groups.map((group) => {
+            if (group.value) {
+              return {
+                type: 'select',
+                value: group.value
+              }
+            }
+            return {
+              type: 'select'
+            }
+          }),
+          limit: 10
+        }
+      }
+
+      for (const group of groups) {
+        if (!group.value.value) {
+          boardReducers['board:uncategorized'] = {
+            type: 'aggregation',
+            filter: {
+              operator: 'and',
+              filters: [
+                {
+                  property: group.property,
+                  filter: {
+                    operator: 'is_empty'
+                  }
+                }
+              ]
+            },
+            aggregation: {
+              aggregator: 'count'
+            }
+          }
+          boardReducers['results:uncategorized'] = {
+            type: 'results',
+            filter: {
+              operator: 'and',
+              filters: [
+                {
+                  property: group.property,
+                  filter: {
+                    operator: 'is_empty'
+                  }
+                }
+              ]
+            },
+            limit
+          }
+        } else {
+          boardReducers[`board:${group.value.value}`] = {
+            type: 'aggregation',
+            filter: {
+              operator: 'and',
+              filters: [
+                {
+                  property: group.property,
+                  filter: {
+                    operator: 'enum_is',
+                    value: {
+                      type: 'exact',
+                      value: group.value.value
+                    }
+                  }
+                }
+              ]
+            },
+            aggregation: {
+              aggregator: 'count'
+            }
+          }
+
+          boardReducers[`board:${group.value.value}`] = {
+            type: 'results',
+            filter: {
+              operator: 'and',
+              filters: [
+                {
+                  property: group.property,
+                  filter: {
+                    operator: 'enum_is',
+                    value: {
+                      type: 'exact',
+                      value: group.value.value
+                    }
+                  }
+                }
+              ]
+            },
+            limit
+          }
+        }
+      }
+      loader.reducers = boardReducers
     }
 
-    // useful for debugging collection queries
-    // console.log(JSON.stringify('queryCollection', { collectionId, collectionViewId, query, loader }, null, 2))
+    //useful for debugging collection queries
+    //console.log('queryCollection', JSON.stringify( { collectionId, collectionViewId, query, loader}, null, 2))
 
     return this.fetch<notion.CollectionInstance>({
       endpoint: 'queryCollection',
       body: {
-        collectionId,
-        collectionViewId,
-        query,
+        collection: {
+          id: collectionId
+        },
+        collectionView: {
+          id: collectionViewId
+        },
         loader
       },
       gotOptions
@@ -326,6 +445,8 @@ export class NotionAPI {
   //handle setting group_by for the query if it isn't already
   private getQuery(collectionView: notion.CollectionView | undefined) {
     let query = collectionView?.query2 || collectionView?.query
+    if(!query) return undefined
+    
     const groupBy = collectionView?.format?.board_columns_by
       ? collectionView?.format?.board_columns_by?.property
       : undefined

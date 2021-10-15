@@ -57,7 +57,8 @@ export const Block: React.FC<BlockProps> = (props) => {
     minTableOfContentsItems,
     defaultPageIcon,
     defaultPageCover,
-    defaultPageCoverPosition
+    defaultPageCoverPosition,
+    displayPageHeader,
   } = useNotionContext()
 
   const {
@@ -186,7 +187,7 @@ export const Block: React.FC<BlockProps> = (props) => {
               <div className='notion-viewport' />
 
               <div className='notion-frame'>
-                <PageHeader />
+                {displayPageHeader ? <PageHeader /> : null}
 
                 <div className='notion-page-scroller'>
                   {hasPageCover ? (

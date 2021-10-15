@@ -2,6 +2,7 @@ import * as types from 'notion-types'
 
 export type MapPageUrl = (pageId: string, recordMap?: types.ExtendedRecordMap | undefined) => string
 export type MapImageUrl = (url: string, block: types.Block) => string
+export type MapAssetUrl = (url: string, block: types.Block) => string
 export type SearchNotion = (
   params: types.SearchParams
 ) => Promise<types.SearchResults>
@@ -24,7 +25,7 @@ export interface NotionComponents {
   pdf: any
   tweet: any
   modal: any
-
+  youtube: any
 }
 
 export interface CollectionViewProps {

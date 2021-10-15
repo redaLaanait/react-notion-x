@@ -5,6 +5,7 @@ import { ExtendedRecordMap } from 'notion-types'
 import {
   MapPageUrl,
   MapImageUrl,
+  MapAssetUrl,
   SearchNotion,
   NotionComponents
 } from './types'
@@ -17,6 +18,8 @@ export interface NotionRendererProps {
 
   mapPageUrl?: MapPageUrl
   mapImageUrl?: MapImageUrl
+  mapAssetUrl?: MapAssetUrl
+
   searchNotion?: SearchNotion
 
   rootPageId?: string
@@ -43,6 +46,7 @@ export interface NotionRendererProps {
 
   blockId?: string
   hideBlockId?: boolean
+  displayPageHeader?: boolean
 }
 
 interface NotionBlockRendererProps {
@@ -61,6 +65,7 @@ export const NotionRenderer: React.FC<NotionRendererProps> = ({
   recordMap,
   mapPageUrl,
   mapImageUrl,
+  mapAssetUrl,
   searchNotion,
   fullPage,
   rootPageId,
@@ -72,6 +77,7 @@ export const NotionRenderer: React.FC<NotionRendererProps> = ({
   defaultPageIcon,
   defaultPageCover,
   defaultPageCoverPosition,
+  displayPageHeader,
   ...rest
 }) => {
   const zoom =
@@ -88,6 +94,7 @@ export const NotionRenderer: React.FC<NotionRendererProps> = ({
       recordMap={recordMap}
       mapPageUrl={mapPageUrl}
       mapImageUrl={mapImageUrl}
+      mapAssetUrl={mapAssetUrl}
       searchNotion={searchNotion}
       fullPage={fullPage}
       rootPageId={rootPageId}
@@ -100,6 +107,7 @@ export const NotionRenderer: React.FC<NotionRendererProps> = ({
       defaultPageCover={defaultPageCover}
       defaultPageCoverPosition={defaultPageCoverPosition}
       zoom={zoom}
+      displayPageHeader={displayPageHeader}
     >
       <NotionBlockRenderer {...rest} />
     </NotionContextProvider>

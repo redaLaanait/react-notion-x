@@ -25,7 +25,7 @@ const types = [
 export const Asset: React.FC<{
   block: BaseContentBlock
 }> = ({ block }) => {
-  const { recordMap, mapImageUrl, components } = useNotionContext()
+  const { recordMap, mapImageUrl, mapAssetUrl, components } = useNotionContext()
 
   if (!block || !types.includes(block.type)) {
     return null
@@ -127,7 +127,8 @@ export const Asset: React.FC<{
       if (!signedUrl) return null
       console.log('pdf', block, signedUrl)
 
-      content = <components.pdf file={signedUrl} />
+      
+      content = <components.pdf file={mapAssetUrl(signedUrl, (block as Block))} block={block} />
     }
   } else if (
     block.type === 'embed' ||
@@ -191,20 +192,28 @@ export const Asset: React.FC<{
             />
           )
         } else {
-          content = (
-            <iframe
-              className='notion-asset-object-fit'
-              style={assetStyle}
-              src={src}
-              title={`iframe ${block.type}`}
-              frameBorder='0'
-              // TODO: is this sandbox necessary?
-              // sandbox='allow-scripts allow-popups allow-top-navigation-by-user-activation allow-forms allow-same-origin'
-              allowFullScreen
-              // this is important for perf but react's TS definitions don't seem to like it
-              loading='lazy'
-            />
-          )
+
+          if (
+              block.type == "video" &&
+              src.indexOf('youtube') > 0 ||
+              src.indexOf('youtu.be') > 0
+              ) {
+            content = <components.youtube src={src} block={block} />
+          } else {
+            content = (
+              <iframe
+                className='notion-asset-object-fit'
+                style={assetStyle}
+                src={src}
+                title={`iframe ${block.type}`}
+                frameBorder='0'
+                // TODO: is this sandbox necessary?
+                // sandbox='allow-scripts allow-popups allow-top-navigation-by-user-activation allow-forms allow-same-origin'
+                allowFullScreen
+                // this is important for perf but react's TS definitions don't seem to like it
+                loading='lazy'
+              />)
+          }
         }
       }
     }

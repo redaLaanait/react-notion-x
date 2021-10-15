@@ -4,11 +4,13 @@ import { ExtendedRecordMap } from 'notion-types'
 import {
   MapPageUrl,
   MapImageUrl,
+  MapAssetUrl,
   SearchNotion,
   NotionComponents
 } from './types'
 import { defaultMapPageUrl, defaultMapImageUrl } from './utils'
 import { Checkbox as DefaultCheckbox } from './components/checkbox'
+import { url } from 'inspector'
 
 export interface NotionContext {
   recordMap: ExtendedRecordMap
@@ -16,6 +18,7 @@ export interface NotionContext {
 
   mapPageUrl: MapPageUrl
   mapImageUrl: MapImageUrl
+  mapAssetUrl: MapAssetUrl
   searchNotion?: SearchNotion
 
   rootPageId?: string
@@ -32,6 +35,9 @@ export interface NotionContext {
   defaultPageCoverPosition?: number
 
   zoom: any
+
+  displayPageHeader?: boolean
+
 }
 
 export interface PartialNotionContext {
@@ -40,6 +46,7 @@ export interface PartialNotionContext {
 
   mapPageUrl?: MapPageUrl
   mapImageUrl?: MapImageUrl
+  mapAssetUrl?: MapAssetUrl
   searchNotion?: SearchNotion
 
   rootPageId?: string
@@ -57,6 +64,8 @@ export interface PartialNotionContext {
   defaultPageCoverPosition?: number
 
   zoom?: any
+
+  displayPageHeader?: boolean
 }
 
 const DefaultLink: React.SFC = (props) => (
@@ -89,7 +98,8 @@ const defaultComponents: NotionComponents = {
 
   pdf: dummyComponent('pdf'),
   tweet: dummyComponent('tweet'),
-  modal: dummyComponent('modal')
+  modal: dummyComponent('modal'),
+  youtube: null
 }
 
 const defaultNotionContext: NotionContext = {
@@ -106,6 +116,7 @@ const defaultNotionContext: NotionContext = {
 
   mapPageUrl: defaultMapPageUrl(),
   mapImageUrl: defaultMapImageUrl,
+  mapAssetUrl: (url) => url,
   searchNotion: null,
 
   fullPage: false,
@@ -120,7 +131,9 @@ const defaultNotionContext: NotionContext = {
   defaultPageCover: null,
   defaultPageCoverPosition: 0.5,
 
-  zoom: null
+  zoom: null,
+
+  displayPageHeader: true,
 }
 
 const ctx = React.createContext<NotionContext>(defaultNotionContext)
@@ -130,6 +143,7 @@ export const NotionContextProvider: React.SFC<PartialNotionContext> = ({
   children,
   mapPageUrl,
   mapImageUrl,
+  mapAssetUrl,
   rootPageId,
   ...rest
 }) => {
@@ -147,6 +161,7 @@ export const NotionContextProvider: React.SFC<PartialNotionContext> = ({
         rootPageId,
         mapPageUrl: mapPageUrl ?? defaultMapPageUrl(rootPageId),
         mapImageUrl: mapImageUrl ?? defaultMapImageUrl,
+        mapAssetUrl: mapAssetUrl ?? defaultNotionContext.mapAssetUrl,
         components: { ...defaultComponents, ...themeComponents }
       }}
     >

@@ -1,6 +1,6 @@
 {
   "name": "notion-client-trk",
-  "version": "4.9.98",
+  "version": "4.9.99",
   "description": "Robust TypeScript client for the unofficial Notion API.",
   "repository": "NotionX/react-notion-x",
   "author": "Travis Fischer <travis@transitivebullsh.it>",

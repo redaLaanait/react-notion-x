@@ -12,7 +12,8 @@ export interface NotionComponents {
   link: any
   pageLink: any
   checkbox: React.FC<{ isChecked: boolean, blockId: string }>
-
+  details: any
+  
   // blocks
   code: any
   equation: any
@@ -26,7 +27,6 @@ export interface NotionComponents {
   tweet: any
   modal: any
   youtube: any
-  details: any
 }
 
 

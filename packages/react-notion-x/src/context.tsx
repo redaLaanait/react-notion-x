@@ -103,7 +103,8 @@ const defaultComponents: NotionComponents = {
   link: DefaultLink,
   pageLink: DefaultPageLink,
   checkbox: DefaultCheckbox,
-
+  details: DefaultDetails,
+  
   code: dummyComponent('code'),
   equation: dummyComponent('equation'),
 
@@ -113,8 +114,7 @@ const defaultComponents: NotionComponents = {
   pdf: dummyComponent('pdf'),
   tweet: dummyComponent('tweet'),
   modal: dummyComponent('modal'),
-  youtube: null,
-  details: DefaultDetails
+  youtube: null
 }
 
 const defaultNotionContext: NotionContext = {

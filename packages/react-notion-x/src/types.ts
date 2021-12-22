@@ -26,7 +26,9 @@ export interface NotionComponents {
   tweet: any
   modal: any
   youtube: any
+  details: any
 }
+
 
 export interface CollectionViewProps {
   collection: types.Collection

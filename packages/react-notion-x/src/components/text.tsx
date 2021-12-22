@@ -165,6 +165,7 @@ export const Text: React.FC<{
                         : decorator[1]
                     }
                     {...linkProps}
+                    block={block}
                   >
                     {element}
                   </components.link>

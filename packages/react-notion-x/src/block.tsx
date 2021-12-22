@@ -687,6 +687,7 @@ export const Block: React.FC<BlockProps> = (props) => {
               blockId
             )}
             href={block.properties.link[0][0]}
+            block={block}
           >
             <div>
               {title && (
@@ -731,13 +732,14 @@ export const Block: React.FC<BlockProps> = (props) => {
 
     case 'toggle':
       return (
-        <details className={cs('notion-toggle', blockId)}>
-          <summary>
-            <Text value={block.properties?.title} block={block} />
-          </summary>
+        // <details className={cs('notion-toggle', blockId)}>
+        //   <summary>
+        //     <Text value={block.properties?.title} block={block} />
+        //   </summary>
 
-          <div>{children}</div>
-        </details>
+        //   <div>{children}</div>
+        // </details>
+        <components.details blockId={blockId} block={block} summary={<Text value={block.properties?.title} block={block} />}>{children}</components.details>
       )
 
     case 'table_of_contents': {
